@@ -105,7 +105,11 @@ class Sorbet::Private::RequireEverything
 
     # Exclude files that have already been loaded by rails
     rails = Object.const_get(:Rails)
-    load_paths = rails.application.send(:_all_load_paths)
+    load_paths = if rails::VERSION::MAJOR >= 6
+      rails.application.send(:_all_load_paths, rails.application.config.add_autoload_paths_to_load_path)
+    else
+      rails.application.send(:_all_load_paths)
+    end
     load_paths.each do |path|
       excluded_paths += Dir.glob("#{path}/**/*.rb")
     end
